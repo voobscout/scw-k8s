@@ -17,14 +17,14 @@ RUN /usr/local/sbin/builder-enter && apt-get install -y -q jq
 
 # Install packages
 RUN sed -i '/mirror.scaleway/s/^/#/' /etc/apt/sources.list \
- && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
- && echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' > /etc/apt/sources.list.d/kubernetes.list \
  && apt-get -q update                   \
  && echo "Y" | apt-get upgrade  -y -qq  \
  && apt-get install -y -q               \
       apparmor                          \
       arping                            \
       aufs-tools                        \
+      dnsutils                          \
+      apt-transport-https               \
       btrfs-tools                       \
       bridge-utils                      \
       cgroup-lite                       \
@@ -42,15 +42,17 @@ RUN sed -i '/mirror.scaleway/s/^/#/' /etc/apt/sources.list \
 RUN apt-get install -q -y docker.io docker-compose
 
 # Install k8s
-RUN apt-get install -q -y               \
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
+ && echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' > /etc/apt/sources.list.d/kubernetes.list \
+ && apt-get update                      \
+ && apt-get install -q -y               \
       kubelet                           \
       kubeadm                           \
       kubectl                           \
       kubernetes-cni                    \
-      dnsutils
 
 # Get a k8s join token
-RUN
+# RUN
 
 # Install Docker Machine
 RUN case "${ARCH}" in                                                                                                                                                 \
