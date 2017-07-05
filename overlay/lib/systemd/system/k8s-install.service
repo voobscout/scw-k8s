@@ -5,7 +5,7 @@ Requires=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash -l -c "[[ $(/usr/bin/dpkg -l | /bin/grep -i 'kube[adm|ctl|let|rnetes\-cni]') ]] && exit 0 || (/usr/bin/apt-get update && /usr/bin/apt-get -fy kubelet kubeadm kubectl kubernetes-cni)"
+ExecStart=/bin/bash -l -c "[[ $(/usr/bin/dpkg -l | /bin/grep -i 'kube[adm|ctl|let|rnetes\-cni]') ]] && exit 0 || (/usr/bin/apt-get update && /usr/bin/apt-get -y kubelet kubeadm kubectl kubernetes-cni)"
 SyslogIdentifier=k8s-install
 
 [Install]
