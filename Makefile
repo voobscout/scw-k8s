@@ -1,14 +1,14 @@
-NAME =			docker
+NAME =			k8s
 VERSION =		latest
 VERSION_ALIASES =	1.12.6 1.12 1
-TITLE =			Docker
-DESCRIPTION =		Docker + Docker-Compose + gosu + nsenter + pipework
-SOURCE_URL =		https://github.com/scaleway-community/scaleway-docker
+TITLE =			Kuberenetes
+DESCRIPTION =		Docker + Docker-Compose + gosu + nsenter + pipework + Kubernetes
+SOURCE_URL =		https://github.com/voobscout/scw-k8s.git
 DEFAULT_IMAGE_ARCH =	x86_64
 
 IMAGE_VOLUME_SIZE =	50G
 IMAGE_BOOTSCRIPT =	docker
-IMAGE_NAME =		Docker 1.12.6
+IMAGE_NAME =		Docker 1.12.6 Kubernetes 1.7.0
 
 
 ## Image tools  (https://github.com/scaleway/image-tools)
