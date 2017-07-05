@@ -44,29 +44,7 @@ RUN apt-get install -q -y docker.io docker-compose
 # Install k8s
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
  && echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' > /etc/apt/sources.list.d/kubernetes.list \
- && rm -rf /etc/apt/apt.conf.d/50unattended-upgrades.ucf-dist \
- && bash -l -c "cat <<EOF > /lib/systemd/system/k8s-install.service
-[Unit]
-Description=Install kubernetes
-After=network-online.target
-Requires=network-online.target
-
-[Service]
-Type=simple
-ExecStart=/bin/bash -l -c \"[[ $(/usr/bin/dpkg -l | /bin/grep -i 'kube[adm|ctl|let|rnetes\-cni]') ]] && exit 0 || (/usr/bin/apt-get update && /usr/bin/apt-get -fy kubelet kubeadm kubectl kubernetes-cni)\"
-SyslogIdentifier=k8s-install
-
-[Install]
-WantedBy=multi-user.target
-EOF" \
- && bash -l -c "cat <<EOF > /etc/systemd/system/docker.service.d/override.conf
-[Service]
-ExecStart=
-ExecStart=/usr/bin/docker daemon --storage-driver overlay2 -H fd:// $DOCKER_OPTS
-EOF"
-
-# Get a k8s join token
-RUN systemctl enable k8s-install.service
+ && rm -rf /etc/apt/apt.conf.d/50unattended-upgrades.ucf-dist
 
 # Install Docker Machine
 RUN case "${ARCH}" in                                                                                                                                                 \
@@ -95,8 +73,7 @@ RUN wget -qO /usr/local/bin/pipework https://raw.githubusercontent.com/jpetazzo/
 
 # Patch rootfs
 COPY ./overlay /
-RUN systemctl disable docker; systemctl enable docker
-
+RUN systemctl disable docker; systemctl enable docker; systemctl enable k8s-install.service
 
 # Clean rootfs from image-builder
 RUN /usr/local/sbin/builder-leave && apt-get -fy autoremove
