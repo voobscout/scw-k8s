@@ -43,16 +43,30 @@ RUN apt-get install -q -y docker.io docker-compose
 
 # Install k8s
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
- && echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' > /etc/apt/sources.list.d/kubernetes.list
- # && apt-get update                      \
- # && apt-get install -q -y               \
- #      kubelet                           \
- #      kubeadm                           \
- #      kubectl                           \
- #      kubernetes-cni
+ && echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' > /etc/apt/sources.list.d/kubernetes.list \
+ && rm -rf /etc/apt/apt.conf.d/50unattended-upgrades.ucf-dist \
+ && cat <<EOF > /lib/systemd/system/k8s-install.service
+[Unit]
+Description=Install kubernetes
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -l -c "[[ $(/usr/bin/dpkg -l | /bin/grep -i 'kube[adm|ctl|let|rnetes\-cni]') ]] && exit 0 || (/usr/bin/apt-get update && /usr/bin/apt-get -fy kubelet kubeadm kubectl kubernetes-cni)"
+SyslogIdentifier=k8s-install
+
+[Install]
+WantedBy=multi-user.target
+EOF \
+ && cat <<EOF > /etc/systemd/system/docker.service.d/override.conf
+[Service]
+ExecStart=
+ExecStart=/usr/bin/docker daemon --storage-driver overlay2 -H fd:// $DOCKER_OPTS
+EOF
 
 # Get a k8s join token
-# RUN
+RUN systemctl enable k8s-install.service
 
 # Install Docker Machine
 RUN case "${ARCH}" in                                                                                                                                                 \
@@ -85,4 +99,4 @@ RUN systemctl disable docker; systemctl enable docker
 
 
 # Clean rootfs from image-builder
-RUN /usr/local/sbin/builder-leave && apt-get remove --auto-remove -y jq
+RUN /usr/local/sbin/builder-leave && apt-get -fy autoremove
