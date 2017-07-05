@@ -49,7 +49,7 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
       kubelet                           \
       kubeadm                           \
       kubectl                           \
-      kubernetes-cni                    \
+      kubernetes-cni
 
 # Get a k8s join token
 # RUN
