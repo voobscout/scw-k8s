@@ -24,6 +24,7 @@ RUN sed -i '/mirror.scaleway/s/^/#/' /etc/apt/sources.list \
       arping                            \
       aufs-tools                        \
       dnsutils                          \
+      ufw                               \
       apt-transport-https               \
       btrfs-tools                       \
       bridge-utils                      \
@@ -70,9 +71,17 @@ RUN case "${ARCH}" in                                                           
 RUN wget -qO /usr/local/bin/pipework https://raw.githubusercontent.com/jpetazzo/pipework/master/pipework  \
  && chmod +x /usr/local/bin/pipework
 
-
 # Patch rootfs
 COPY ./overlay /
+
+# Configure UFW
+RUN sed -i 's/DEFAULT_INPUT_POLICY="DROP"/DEFAULT_INPUT_POLICY="ACCEPT"/g' /etc/default/ufw && \
+    sed -i '/^COMMIT/i-A ufw-reject-input -j DROP' /etc/ufw/after.rules && \
+    ufw logging off && \
+    ufw allow ssh && \
+    ufw allow from any to any port 6443 && \
+    ufw enable
+#
 RUN systemctl disable docker; systemctl enable docker; systemctl enable k8s-install.service
 
 # Clean rootfs from image-builder
