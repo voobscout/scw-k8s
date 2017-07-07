@@ -77,11 +77,9 @@ COPY ./overlay /
 # Configure UFW
 RUN sed -i 's/DEFAULT_INPUT_POLICY="DROP"/DEFAULT_INPUT_POLICY="ACCEPT"/g' /etc/default/ufw && \
     sed -i '/^COMMIT/i-A ufw-reject-input -j DROP' /etc/ufw/after.rules && \
-    ufw logging off && \
-    ufw allow ssh && \
-    ufw allow from any to any port 6443 && \
-    ufw enable
-#
+    sed -i '/^COMMIT/i-A ufw-user-input -p tcp --dport 22 -j ACCEPT' /etc/ufw/user.rules && \
+    sed -i '/^COMMIT/i-A ufw-user-input -p tcp --dport 6443 -j ACCEPT' /etc/ufw/user.rules
+
 RUN systemctl disable docker; systemctl enable docker; systemctl enable k8s-install.service
 
 # Clean rootfs from image-builder
